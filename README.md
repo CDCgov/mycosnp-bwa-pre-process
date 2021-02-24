@@ -77,7 +77,7 @@ gf --log-level debug run mycosnp-bwa-pre-process \
     --in.reference_sequence /path/to/reference/candida-auris_clade-i_B8441_GCA_002759435.2.fasta \
         --param.rate 1.0 \
         --param.threads 4 \
-        --ec default:gridengine \
+        --ec default:slurm \
         --ep \
             default.slots:4 \
             'default.init:echo `hostname` && mkdir -p $HOME/tmp && export TMPDIR=$HOME/tmp && export _JAVA_OPTIONS=-Djava.io.tmpdir=$HOME/tmp && export XDG_RUNTIME_DIR=' 
@@ -92,7 +92,7 @@ Arguments are explained below:
 5. ``--in.reference_sequence``: This is the reference FASTA file, which is needed to calculate the length of the reference in order to estimate coverage. 
 6. ``--param.rate`` and ``--param.coverage``: If ``param.rate`` is specified, then ``param.coverage`` is ignored. ``param.rate`` specifies the rate for downsampling FASTQ files. A rate of 1.0 indicates that 100% of reads in the FASTQ files are retained, which effectively "skips" downsampling. If ``param.coverage`` is specified and ``param.rate`` is not specified, ``param.coverage`` is used to calculate a downsampling rate that results in the specified coverage. For example if ``param.coverage 70``, then FASTQ files are downsampled such that, when aligned to the reference, the result is approximately 70x coverage. 
 7. ``--param.threads``: Number of CPU threads used for sequence alignment. This should ideally match the ``default.slots`` parameter.
-8. ``--ec default:gridengine``: This is the workflow "execution context", which specifies where the workflow will be executed. "gridengine" is recommended, as this will execute the workflow on the HPC. However, "local" may also be used. 
+8. ``--ec default:slurm``: This is the workflow "execution context", which specifies where the workflow will be executed. "gridengine" or "slurm" is recommended, as this will execute the workflow on the HPC. However, "local" may also be used. 
 9. ``--ep``: This specifies one or more workflow "execution parameters".
    a. ``default.slots:4``: This specifies the number of CPUs or "slots" to request from the gridengine HPC when executing the workflow.
    b. ``'default.init:echo `hostname` && mkdir -p $HOME/tmp && export TMPDIR=$HOME/tmp && export _JAVA_OPTIONS=-Djava.io.tmpdir=$HOME/tmp && export XDG_RUNTIME_DIR='``: This specifies a number of commands to execute on each HPC node to prepare that node for execution. This commands ensure that a local "tmp" directory is used (rather than /tmp), and also resets an environment variable that may interfere with correct execution of singularity containers.
