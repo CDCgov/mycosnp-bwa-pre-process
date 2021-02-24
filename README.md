@@ -1,26 +1,104 @@
-# CDCgov GitHub Organization Open Source Project Template
-
-**Template for clearance: This project serves as a template to aid projects in starting up and moving through clearance procedures. To start, create a new repository and implement the required [open practices](open_practices.md), train on and agree to adhere to the organization's [rules of behavior](rules_of_behavior.md), and [send a request through the create repo form](https://forms.office.com/Pages/ResponsePage.aspx?id=aQjnnNtg_USr6NJ2cHf8j44WSiOI6uNOvdWse4I-C2NUNk43NzMwODJTRzA4NFpCUk1RRU83RTFNVi4u) using language from this template as a Guide.**
-
-**General disclaimer** This repository was created for use by CDC programs to collaborate on public health related projects in support of the [CDC mission](https://www.cdc.gov/about/organization/mission.htm).  GitHub is not hosted by the CDC, but is a third party website used by CDC and its partners to share information and collaborate on software. CDC use of GitHub does not imply an endorsement of any one particular service, product, or enterprise. 
-
-## Access Request, Repo Creation Request
-
-* [CDC GitHub Open Project Request Form](https://forms.office.com/Pages/ResponsePage.aspx?id=aQjnnNtg_USr6NJ2cHf8j44WSiOI6uNOvdWse4I-C2NUNk43NzMwODJTRzA4NFpCUk1RRU83RTFNVi4u) _[Requires a CDC Office365 login, if you do not have a CDC Office365 please ask a friend who does to submit the request on your behalf. If you're looking for access to the CDCEnt private organization, please use the [GitHub Enterprise Cloud Access Request form](https://forms.office.com/Pages/ResponsePage.aspx?id=aQjnnNtg_USr6NJ2cHf8j44WSiOI6uNOvdWse4I-C2NUQjVJVDlKS1c0SlhQSUxLNVBaOEZCNUczVS4u).]_
-
-## Related documents
-
-* [Open Practices](open_practices.md)
-* [Rules of Behavior](rules_of_behavior.md)
-* [Thanks and Acknowledgements](thanks.md)
-* [Disclaimer](DISCLAIMER.md)
-* [Contribution Notice](CONTRIBUTING.md)
-* [Code of Conduct](code-of-conduct.md)
+# MycoSNP: BWA Pre-Process
 
 ## Overview
 
-Describe the purpose of your project. Add additional sections as necessary to help collaborators and potential collaborators understand and use your project.
-  
+This repository contains the MycoSNP BWA Pre-Process workflow, which consists of ten steps:
+
+1. Combine FASTQ file lanes if they were provided with multiple lanes.
+2. Down sample FASTQ files to a desired coverage or sampling rate using SeqTK 1.3.
+3. Trim reads and assess quality using FaQCs 2.09.
+4. Align FASTQ reads to a reference using BWA 0.7.17.
+5. Sort BAM files using SAMTools 1.10.
+6. Mark and remove duplicates in the BAM file using Picard 2.22.7.
+7. Clean the BAM file using Picard 2.22.7 "CleanSam".
+8. Fix mate information in the BAM file using Picard 2.22.7 "FixMateInformation".
+9. Add read groups to the BAM file using Picard 2.22.7 "AddOrReplaceReadGroups".
+10. Index the BAM file using SAMTools 1.10.
+
+## Requirements
+
+Before installing and running this workflow, follow the instructions in the main repository to install the requirements: https://github.com/CDCgov/mycosnp
+
+## Installation
+
+First install GeneFlow and its dependencies as follows:
+
+1. Activate the [previously installed](https://github.com/CDCgov/mycosnp) Python virtual environment.
+
+    ```bash
+    cd ~/mycosnp
+    source gfpy/bin/activate
+    ```
+
+2. Clone and install the mycosnp-bwa-pre-process workflow.
+
+    ```bash
+    gf install-workflow --make-apps -g https://github.com/CDCgov/mycosnp-bwa-pre-process mycosnp-bwa-pre-process
+    ```
+
+    The workflow should now be installed in the `~/mycosnp/mycosnp-bwa-pre-process` directory.
+
+## Execution
+
+View the workflow parameter requirements using GeneFlow's `help` command:
+
+```
+cd ~/mycosnp
+gf help mycosnp-bwa-pre-process
+```
+
+Execute the workflow with a command similar to the following. Be sure to replace the `/path/to/reference/..` with your reference sequence, and replace the `/path/to/bwa/index` with the path to the index created by the MycoSNP BWA Reference workflow:
+
+```
+gf --log-level debug run mycosnp-bwa-pre-process \
+    -o ./output \
+    -n test-mycosnp-bwa-pre-process \
+    --in.input_folder ./test-data1 ./test-data2 ./test-data3 \
+    --in.reference_index /path/to/bwa/index \
+    --in.reference_sequence /path/to/reference/candida-auris_clade-i_B8441_GCA_002759435.2.fasta \
+        --param.rate 1.0 \
+        --param.threads 4
+```
+
+Alternatively, to execute the workflow on an HPC system, you must first set the DRMAA library path environment variable. For example:
+
+```
+export DRMAA_LIBRARY_PATH=/opt/sge/lib/lx-amd64/libdrmaa2.so
+```
+
+Note that the DRMAA library for your specific scheduler (either UGE/SGE or SLURM) must be installed, and the installed library path may be different in your environment. Once the environment has been configured, execute the workflow as follows:
+
+```
+gf --log-level debug run mycosnp-bwa-pre-process \
+    -o ./output \
+    -n test-mycosnp-bwa-pre-process \
+    --in.input_folder ./test-data1 ./test-data2 ./test-data3 \
+    --in.reference_index /path/to/bwa/index \
+    --in.reference_sequence /path/to/reference/candida-auris_clade-i_B8441_GCA_002759435.2.fasta \
+        --param.rate 1.0 \
+        --param.threads 4 \
+        --ec default:gridengine \
+        --ep \
+            default.slots:4 \
+            'default.init:echo `hostname` && mkdir -p $HOME/tmp && export TMPDIR=$HOME/tmp && export _JAVA_OPTIONS=-Djava.io.tmpdir=$HOME/tmp && export XDG_RUNTIME_DIR=' 
+```
+
+Arguments are explained below:
+
+1. ``-o ./output``: The workflow's output will be placed in the ``./output`` folder. This folder will be created if it doesn't already exist. 
+2. ``-n test-mycosnp-bwa-pre-process``: This is the name of the workflow job. A sub-folder with the name ``test-mycosnp-bwa-pre-process`` will be created in ``./output`` for the workflow output. 
+3. ``--in.input_folder``: This must point to one or more folders, separated by spaces, that contain a sub-folder for each sample. Each sub-folder must contain FASTQ paired-end reads named according to standard Illumina file naming convention. Samples may be split into multiple lanes. 
+4. ``--in.reference_index ./output/test-mycosnp-bwa-reference-2e2116de/bwa_index/bwa_index``: This must point to the output folder of a MycoSNP BWA Reference workflow run that contains the BWA index. 
+5. ``--in.reference_sequence``: This is the reference FASTA file, which is needed to calculate the length of the reference in order to estimate coverage. 
+6. ``--param.rate`` and ``--param.coverage``: If ``param.rate`` is specified, then ``param.coverage`` is ignored. ``param.rate`` specifies the rate for downsampling FASTQ files. A rate of 1.0 indicates that 100% of reads in the FASTQ files are retained, which effectively "skips" downsampling. If ``param.coverage`` is specified and ``param.rate`` is not specified, ``param.coverage`` is used to calculate a downsampling rate that results in the specified coverage. For example if ``param.coverage 70``, then FASTQ files are downsampled such that, when aligned to the reference, the result is approximately 70x coverage. 
+7. ``--param.threads``: Number of CPU threads used for sequence alignment. This should ideally match the ``default.slots`` parameter.
+8. ``--ec default:gridengine``: This is the workflow "execution context", which specifies where the workflow will be executed. "gridengine" is recommended, as this will execute the workflow on the HPC. However, "local" may also be used. 
+9. ``--ep``: This specifies one or more workflow "execution parameters".
+   a. ``default.slots:4``: This specifies the number of CPUs or "slots" to request from the gridengine HPC when executing the workflow.
+   b. ``'default.init:echo `hostname` && mkdir -p $HOME/tmp && export TMPDIR=$HOME/tmp && export _JAVA_OPTIONS=-Djava.io.tmpdir=$HOME/tmp && export XDG_RUNTIME_DIR='``: This specifies a number of commands to execute on each HPC node to prepare that node for execution. This commands ensure that a local "tmp" directory is used (rather than /tmp), and also resets an environment variable that may interfere with correct execution of singularity containers.
+
+After successful execution, the output directory should contain two sub-directories: ``bam_index`` and ``qc_trim``. ``bam_index`` should contain a sub-directory for each sample, and this sub-directory should contain a BAM file and a BAM index. ``qc_trim`` should contain a sub-directory for each sample, and this sub-directory should contain trimmed FASTQ files and QC reports. Note: the output of the "No-QC" version of the workflow should not contain a ``qc_trim`` sub-directory. 
+
 ## Public Domain Standard Notice
 This repository constitutes a work of the United States Government and is not
 subject to domestic copyright protection under 17 USC § 105. This repository is in

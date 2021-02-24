@@ -1,0 +1,227 @@
+%YAML 1.1
+---
+gfVersion: v2.0
+class: workflow
+
+name: MycoSNP BWA Pre-Process
+description: Prepare samples for analysis with the MycoSNP workflow
+version: '0.14'
+git: https://git.biotech.cdc.gov/geneflow-workflows/mycosnp-bwa-pre-process.git
+
+apps:
+  concat-fastq-lanes:
+    git: https://git.biotech.cdc.gov/geneflow-apps/concat-fastq-lanes-gf2.git
+    version: '0.2'
+  seqtk-downsample:
+    git: https://git.biotech.cdc.gov/geneflow-apps/seqtk-downsample-gf2.git
+    version: '1.3-02'
+  faqcs:
+    git: https://git.biotech.cdc.gov/geneflow-apps/faqcs-gf2.git
+    version: '2.09-01'
+  bwa-align:
+    git: https://git.biotech.cdc.gov/geneflow-apps/bwa-align-gf2.git
+    version: '0.2'
+  bam-sort:
+    git: https://git.biotech.cdc.gov/geneflow-apps/bam-sort-gf2.git
+    version: '1.10-02'
+  picard-markduplicates:
+    git: https://git.biotech.cdc.gov/geneflow-apps/picard-markduplicates-gf2.git
+    version: '2.22.7-01'
+  picard-cleansam:
+    git: https://git.biotech.cdc.gov/geneflow-apps/picard-cleansam-gf2.git
+    version: '2.22.7-01'
+  picard-fixmateinformation:
+    git: https://git.biotech.cdc.gov/geneflow-apps/picard-fixmateinformation-gf2.git
+    version: '2.22.7-01'
+  picard-addorreplacereadgroups:
+    git: https://git.biotech.cdc.gov/geneflow-apps/picard-addorreplacereadgroups-gf2.git
+    version: '2.22.7-01'
+  bam-index:
+    git: https://git.biotech.cdc.gov/geneflow-apps/bam-index-gf2.git
+    version: '1.10-02'
+
+inputs:
+  input_folder:
+    label: Input Directory
+    description: Input directory containing directories of multi-lane FASTQ pairs
+    type: Directory
+    default: /input/files
+    enable: true
+    visible: true
+
+  reference_index:
+    label: BWA Reference Index
+    description: BWA reference index
+    type: Directory
+    default: /reference/sequence
+    enable: true
+    visible: true
+
+  reference_sequence:
+    label: Reference Sequence
+    description: Reference sequence FASTA file
+    type: File
+    default: /reference/sequence
+    enable: true
+    visible: true
+
+parameters:
+  coverage:
+    label: Sample Coverage
+    description: Desired sample coverage
+    type: int
+    default: 70
+    enable: true
+    visible: true
+
+  rate:
+    label: Sample Rate
+    description: Desired sample rate
+    type: string
+    default: ''
+    enable: true
+    visible: true
+
+  threads:
+    label: CPU Threads
+    description: Number of CPU threads for alignment
+    type: int
+    default: 2
+    enable: true
+    visible: true
+
+final_output:
+- qc_trim
+- bam_index
+
+steps:
+  combine_lanes:
+    app: concat-fastq-lanes
+    depend: []
+    map:
+      uri: ${workflow->input_folder}
+      glob: '*/*'
+      regex: ^(?!.*_L00[2-9])(.*)/(.*?)_(L001_|)(R|)1(.*)\.((fastq|fq)(|\.gz))$
+    template:
+      input_folder: ${workflow->input_folder}/${1}
+      extension: fastq
+      output: ${2}
+
+  down_sample:
+    app: seqtk-downsample
+    depend:
+    - combine_lanes
+    map:
+      uri: ${combine_lanes->output}
+      regex: ^(?!_log)(.*)
+    template:
+      input: ${combine_lanes->output}/${1}/${1}_R1.fastq.gz
+      pair: ${combine_lanes->output}/${1}/${1}_R2.fastq.gz
+      reference: ${workflow->reference_sequence}
+      coverage: ${workflow->coverage}
+      rate: ${workflow->rate}
+      output: ${1}
+      
+  qc_trim:
+    app: faqcs
+    depend: 
+    - down_sample
+    map:
+      uri: ${down_sample->output}
+      regex: ^(?!_log)(.*)
+    template:
+      input: ${down_sample->output}/${1}/${1}_R1.fastq.gz
+      pair: ${down_sample->output}/${1}/${1}_R2.fastq.gz
+      output: ${1}
+
+  align:
+    app: bwa-align
+    depend:
+    - qc_trim
+    map:
+      uri: ${qc_trim->output}
+      regex: ^(?!_log)(.*)
+    template:
+      input: ${qc_trim->output}/${1}/${1}.1.trimmed.fastq
+      pair: ${qc_trim->output}/${1}/${1}.2.trimmed.fastq
+      reference_index: ${workflow->reference_index}
+      threads: ${workflow->threads}
+      output: ${1}
+
+  bam_sort:
+    app: bam-sort
+    depend:
+    - align
+    map:
+      uri: ${align->output}
+      regex: ^(?!_log)(.*)
+    template:
+      input: ${align->output}/${1}/${1}.bam
+      sort_order: coordinate
+      output: ${1}
+
+  mark_duplicates:
+    app: picard-markduplicates
+    depend:
+    - bam_sort
+    map:
+      uri: ${bam_sort->output}
+      regex: ^(?!_log)(.*)
+    template:
+      input: ${bam_sort->output}/${1}/${1}.bam
+      validation_stringency: LENIENT
+      remove_duplicates: 'true'
+      assume_sorted: 'true'
+      output: ${1}
+
+  clean_sam:
+    app: picard-cleansam
+    depend:
+    - mark_duplicates
+    map:
+      uri: ${mark_duplicates->output}
+      regex: ^(?!_log)(.*)
+    template:
+      input: ${mark_duplicates->output}/${1}/${1}.bam
+      validation_stringency: LENIENT
+      output: ${1}
+
+  fix_mate_information:
+    app: picard-fixmateinformation
+    depend:
+    - clean_sam
+    map:
+      uri: ${clean_sam->output}
+      regex: ^(?!_log)(.*)
+    template:
+      input: ${clean_sam->output}/${1}/${1}.bam
+      validation_stringency: LENIENT
+      output: ${1}
+ 
+  read_groups:
+    app: picard-addorreplacereadgroups
+    depend:
+    - fix_mate_information
+    map:
+      uri: ${fix_mate_information->output}
+      regex: ^(?!_log)(.*)
+    template:
+      input: ${fix_mate_information->output}/${1}/${1}.bam
+      id: id
+      library: library
+      platform: illumina
+      barcode: barcode
+      sample: ${1}
+      output: ${1}
+
+  bam_index:
+    app: bam-index
+    depend:
+    - read_groups
+    map:
+      uri: ${read_groups->output}
+      regex: ^(?!_log)(.*)
+    template:
+      input: ${read_groups->output}/${1}/${1}.bam
+      output: ${1}
+...
