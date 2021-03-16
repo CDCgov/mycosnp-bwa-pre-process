@@ -5,39 +5,39 @@ class: workflow
 
 name: MycoSNP BWA Pre-Process
 description: Prepare samples for analysis with the MycoSNP workflow
-version: '0.14'
+version: '0.15'
 git: https://git.biotech.cdc.gov/geneflow-workflows/mycosnp-bwa-pre-process.git
 
 apps:
   concat-fastq-lanes:
-    git: https://git.biotech.cdc.gov/geneflow-apps/concat-fastq-lanes-gf2.git
+    git: https://gitlab.com/geneflow/apps/concat-fastq-lanes-gf2.git
     version: '0.2'
   seqtk-downsample:
-    git: https://git.biotech.cdc.gov/geneflow-apps/seqtk-downsample-gf2.git
+    git: https://gitlab.com/geneflow/apps/seqtk-downsample-gf2.git
     version: '1.3-02'
   faqcs:
-    git: https://git.biotech.cdc.gov/geneflow-apps/faqcs-gf2.git
+    git: https://gitlab.com/geneflow/apps/faqcs-gf2.git
     version: '2.09-01'
   bwa-align:
-    git: https://git.biotech.cdc.gov/geneflow-apps/bwa-align-gf2.git
+    git: https://gitlab.com/geneflow/apps/bwa-align-gf2.git
     version: '0.2'
   bam-sort:
-    git: https://git.biotech.cdc.gov/geneflow-apps/bam-sort-gf2.git
-    version: '1.10-02'
+    git: https://gitlab.com/geneflow/apps/bam-sort-gf2.git
+    version: '1.10-05'
   picard-markduplicates:
-    git: https://git.biotech.cdc.gov/geneflow-apps/picard-markduplicates-gf2.git
+    git: https://gitlab.com/geneflow/apps/picard-markduplicates-gf2.git
     version: '2.22.7-01'
   picard-cleansam:
-    git: https://git.biotech.cdc.gov/geneflow-apps/picard-cleansam-gf2.git
+    git: https://gitlab.com/geneflow/apps/picard-cleansam-gf2.git
     version: '2.22.7-01'
   picard-fixmateinformation:
-    git: https://git.biotech.cdc.gov/geneflow-apps/picard-fixmateinformation-gf2.git
+    git: https://gitlab.com/geneflow/apps/picard-fixmateinformation-gf2.git
     version: '2.22.7-01'
   picard-addorreplacereadgroups:
-    git: https://git.biotech.cdc.gov/geneflow-apps/picard-addorreplacereadgroups-gf2.git
-    version: '2.22.7-01'
+    git: https://gitlab.com/geneflow/apps/picard-addorreplacereadgroups-gf2.git
+    version: '2.22.7-03'
   bam-index:
-    git: https://git.biotech.cdc.gov/geneflow-apps/bam-index-gf2.git
+    git: https://gitlab.com/geneflow/apps/bam-index-gf2.git
     version: '1.10-02'
 
 inputs:
