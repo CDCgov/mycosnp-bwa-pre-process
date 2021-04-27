@@ -2,18 +2,19 @@
 
 ## Overview
 
-This repository contains the MycoSNP BWA Pre-Process workflow, which consists of ten steps:
+This repository contains the MycoSNP BWA Pre-Process workflow, which consists of eleven steps:
 
 1. Combine FASTQ file lanes if they were provided with multiple lanes.
-2. Down sample FASTQ files to a desired coverage or sampling rate using SeqTK 1.3.
-3. Trim reads and assess quality using FaQCs 2.09.
-4. Align FASTQ reads to a reference using BWA 0.7.17.
-5. Sort BAM files using SAMTools 1.10.
-6. Mark and remove duplicates in the BAM file using Picard 2.22.7.
-7. Clean the BAM file using Picard 2.22.7 "CleanSam".
-8. Fix mate information in the BAM file using Picard 2.22.7 "FixMateInformation".
-9. Add read groups to the BAM file using Picard 2.22.7 "AddOrReplaceReadGroups".
-10. Index the BAM file using SAMTools 1.10.
+2. Filter unpaired reads from FASTQ files using SeqKit 0.16.0.
+3. Down sample FASTQ files to a desired coverage or sampling rate using SeqTK 1.3.
+4. Trim reads and assess quality using FaQCs 2.09.
+5. Align FASTQ reads to a reference using BWA 0.7.17.
+6. Sort BAM files using SAMTools 1.10.
+7. Mark and remove duplicates in the BAM file using Picard 2.22.7.
+8. Clean the BAM file using Picard 2.22.7 "CleanSam".
+9. Fix mate information in the BAM file using Picard 2.22.7 "FixMateInformation".
+10. Add read groups to the BAM file using Picard 2.22.7 "AddOrReplaceReadGroups".
+11. Index the BAM file using SAMTools 1.10.
 
 ## Requirements
 
