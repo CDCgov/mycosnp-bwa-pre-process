@@ -7,7 +7,7 @@ This repository contains the MycoSNP BWA Pre-Process workflow, which consists of
 1. Combine FASTQ file lanes if they were provided with multiple lanes.
 2. Filter unpaired reads from FASTQ files using SeqKit 0.16.0.
 3. Down sample FASTQ files to a desired coverage or sampling rate using SeqTK 1.3.
-4. Trim reads and assess quality using FaQCs 2.09.
+4. Trim reads and assess quality using FaQCs 2.10.
 5. Align FASTQ reads to a reference using BWA 0.7.17.
 6. Sort BAM files using SAMTools 1.10.
 7. Mark and remove duplicates in the BAM file using Picard 2.22.7.
