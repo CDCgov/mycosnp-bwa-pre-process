@@ -5,7 +5,7 @@ class: workflow
 
 name: MycoSNP BWA Pre-Process
 description: Prepare samples for analysis with the MycoSNP workflow
-version: '0.18'
+version: '0.19'
 git: https://github.com/CDCgov/mycosnp-bwa-pre-process.git
 
 apps:
