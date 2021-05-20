@@ -5,7 +5,7 @@ class: workflow
 
 name: MycoSNP BWA Pre-Process
 description: Prepare samples for analysis with the MycoSNP workflow
-version: '0.19'
+version: '0.20'
 git: https://github.com/CDCgov/mycosnp-bwa-pre-process.git
 
 apps:
@@ -103,6 +103,7 @@ steps:
     depend: []
     map:
       uri: ${workflow->input_folder}
+      inclusive: true
       glob: '**'
       regex: ^(?!.*_L00[2-9])(.*?)/?([^/]*?)_(L001_|)(R|)1(.*)\.((fastq|fq)(|\.gz))$
     template:
