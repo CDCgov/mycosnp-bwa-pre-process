@@ -21,6 +21,9 @@ apps:
   faqcs:
     git: https://gitlab.com/geneflow/apps/faqcs-gf2.git
     version: '2.10-01'
+  qc-report:
+    git: https://gitlab.com/geneflow/apps/qc-report-gf2.git
+    version: '0.1'
   bwa-align:
     git: https://gitlab.com/geneflow/apps/bwa-align-gf2.git
     version: '0.2'
@@ -95,6 +98,7 @@ parameters:
 
 final_output:
 - qc_trim
+- qc_report
 - bam_index
 
 steps:
@@ -151,6 +155,15 @@ steps:
       input: ${down_sample->output}/${1}/${1}_R1.fastq.gz
       pair: ${down_sample->output}/${1}/${1}_R2.fastq.gz
       output: ${1}
+
+  qc_report:
+    app: qc-report
+    depend:
+    - qc_trim
+    template:
+      input_folder: ${qc_trim->output}
+      reference: ${workflow->reference_sequence}
+      output: qc_report.txt
 
   align:
     app: bwa-align

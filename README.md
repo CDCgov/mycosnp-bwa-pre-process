@@ -2,19 +2,20 @@
 
 ## Overview
 
-This repository contains the MycoSNP BWA Pre-Process workflow, which consists of eleven steps:
+This repository contains the MycoSNP BWA Pre-Process workflow, which consists of twelve steps:
 
 1. Combine FASTQ file lanes if they were provided with multiple lanes.
 2. Filter unpaired reads from FASTQ files using SeqKit 0.16.0.
 3. Down sample FASTQ files to a desired coverage or sampling rate using SeqTK 1.3.
 4. Trim reads and assess quality using FaQCs 2.10.
-5. Align FASTQ reads to a reference using BWA 0.7.17.
-6. Sort BAM files using SAMTools 1.10.
-7. Mark and remove duplicates in the BAM file using Picard 2.22.7.
-8. Clean the BAM file using Picard 2.22.7 "CleanSam".
-9. Fix mate information in the BAM file using Picard 2.22.7 "FixMateInformation".
-10. Add read groups to the BAM file using Picard 2.22.7 "AddOrReplaceReadGroups".
-11. Index the BAM file using SAMTools 1.10.
+5. Generate a QC report by extracting data from FaQCs PDFs.
+6. Align FASTQ reads to a reference using BWA 0.7.17.
+7. Sort BAM files using SAMTools 1.10.
+8. Mark and remove duplicates in the BAM file using Picard 2.22.7.
+9. Clean the BAM file using Picard 2.22.7 "CleanSam".
+10. Fix mate information in the BAM file using Picard 2.22.7 "FixMateInformation".
+11. Add read groups to the BAM file using Picard 2.22.7 "AddOrReplaceReadGroups".
+12. Index the BAM file using SAMTools 1.10.
 
 ## Requirements
 
@@ -104,7 +105,7 @@ Arguments are explained below:
    a. ``default.slots:4``: This specifies the number of CPUs or "slots" to request from the gridengine HPC when executing the workflow.
    b. ``'default.init:echo `hostname` && mkdir -p $HOME/tmp && export TMPDIR=$HOME/tmp && export _JAVA_OPTIONS=-Djava.io.tmpdir=$HOME/tmp && export XDG_RUNTIME_DIR='``: This specifies a number of commands to execute on each HPC node to prepare that node for execution. This commands ensure that a local "tmp" directory is used (rather than /tmp), and also resets an environment variable that may interfere with correct execution of singularity containers.
 
-After successful execution, the output directory should contain two sub-directories: ``bam_index`` and ``qc_trim``. ``bam_index`` should contain a sub-directory for each sample, and this sub-directory should contain a BAM file and a BAM index. ``qc_trim`` should contain a sub-directory for each sample, and this sub-directory should contain trimmed FASTQ files and QC reports. Note: the output of the "No-QC" version of the workflow should not contain a ``qc_trim`` sub-directory. 
+After successful execution, the output directory should contain three sub-directories: ``bam_index``, ``qc_trim``, and ``qc_report``. ``bam_index`` should contain a sub-directory for each sample, and this sub-directory should contain a BAM file and a BAM index. ``qc_trim`` should contain a sub-directory for each sample, and this sub-directory should contain trimmed FASTQ files and QC reports. ``qc_report`` should contain a file called ``qc_report.txt``, which is a tab-delimited file with summary QC metrics for each sample. 
 
 ## Public Domain Standard Notice
 This repository constitutes a work of the United States Government and is not
