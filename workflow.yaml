@@ -5,7 +5,7 @@ class: workflow
 
 name: MycoSNP BWA Pre-Process
 description: Prepare samples for analysis with the MycoSNP workflow
-version: '0.20'
+version: '0.21'
 git: https://github.com/CDCgov/mycosnp-bwa-pre-process.git
 
 apps:
@@ -23,7 +23,7 @@ apps:
     version: '2.10-01'
   qc-report:
     git: https://gitlab.com/geneflow/apps/qc-report-gf2.git
-    version: '0.1'
+    version: '0.2'
   bwa-align:
     git: https://gitlab.com/geneflow/apps/bwa-align-gf2.git
     version: '0.2'
