@@ -67,6 +67,17 @@ gf --log-level debug run mycosnp-bwa-pre-process \
         --param.rate 1.0 \
         --param.threads 4
 ```
+You can test this command by using the test data included with the workflow as follows:
+```
+gf --log-level debug run mycosnp-bwa-pre-process \
+    -o ./output \
+    -n test-mycosnp-bwa-pre-process \
+    --in.input_folder ~/mycosnp/mycosnp-bwa-pre-process/data/fastq \
+    --in.reference_index ~/mycosnp/mycosnp-bwa-pre-process/data/bwa_index \
+    --in.reference_sequence ~/mycosnp/mycosnp-bwa-pre-process/data/reference/c_auris_test.fasta \
+        --param.rate 1.0 \
+        --param.threads 4
+```
 
 Alternatively, to execute the workflow on an HPC system, you must first set the DRMAA library path environment variable. For example:
 

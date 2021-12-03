@@ -5,7 +5,7 @@ class: workflow
 
 name: MycoSNP BWA Pre-Process
 description: Prepare samples for analysis with the MycoSNP workflow
-version: '0.21'
+version: '0.22'
 git: https://github.com/CDCgov/mycosnp-bwa-pre-process.git
 
 apps:
@@ -23,7 +23,7 @@ apps:
     version: '2.10-01'
   qc-report:
     git: https://gitlab.com/geneflow/apps/qc-report-gf2.git
-    version: '0.2'
+    version: '0.3'
   bwa-align:
     git: https://gitlab.com/geneflow/apps/bwa-align-gf2.git
     version: '0.2'
@@ -45,6 +45,15 @@ apps:
   bam-index:
     git: https://gitlab.com/geneflow/apps/bam-index-gf2.git
     version: '1.10-02'
+  fastqc:
+    git: https://gitlab.com/geneflow/apps/fastqc-gf2.git
+    version: '0.11.9-02'
+  qualimap:
+    git: https://gitlab.com/geneflow/apps/qualimap-gf2.git
+    version: '2.2.2.1'
+  multiqc:
+    git: https://gitlab.com/geneflow/apps/multiqc-gf2.git
+    version: '1.11.1'
 
 inputs:
   input_folder:
@@ -100,6 +109,9 @@ final_output:
 - qc_trim
 - qc_report
 - bam_index
+- fastqc_bam
+- qualimap
+- multiqc
 
 steps:
   combine_lanes:
@@ -255,4 +267,36 @@ steps:
     template:
       input: ${read_groups->output}/${1}/${1}.bam
       output: ${1}
+
+  fastqc_bam:
+    app: fastqc
+    depend:
+    - bam_sort
+    map:
+      uri: ${bam_sort->output}
+      regex: ^(?!_log)(.*)
+    template:
+      input: ${bam_sort->output}/${1}/${1}.bam
+      output: ${1}
+
+  qualimap:
+    app: qualimap
+    depend:
+    - bam_sort
+    map:
+      uri: ${bam_sort->output}
+      regex: ^(?!_log)(.*)
+    template:
+      input: ${bam_sort->output}/${1}/${1}.bam
+      output: ${1}
+
+  multiqc:
+    app: multiqc
+    depend:
+    - qualimap
+    - fastqc_bam
+    template:
+      input: ${fastqc_bam->output}/../
+      output: multiqc
+
 ...
